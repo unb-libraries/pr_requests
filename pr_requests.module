@@ -1,0 +1,309 @@
+<?php
+/**
+ * @file
+ * PR Requests Module for Drupal 7.x.
+ *
+ * This module handles submission requests to the Fredericton UNB Libraries' PR
+ * Group. It provides a request form and configurable PR Group email list.
+ * Corresponding FogBugz ticket is created, applicant is sent a confirmation
+ * email and members of the email list are notified upon successful request
+ * submissions.
+ */
+
+?>
+
+<?php
+/**
+ * Implements PR Requests hook_menu().
+ */
+function pr_requests_menu() {
+  $items = array();
+
+  $items['pr-requests'] = array(
+    'title' => 'PR Requests',
+    'description' => 'A form used to request PR Group assistance.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pr_requests_form'),
+    'access arguments' => array('access pr requests'),
+  );
+
+  $items['admin/config/pr-requests'] = array(
+    'title' => 'PR Requests settings',
+    'description' => 'Configure PR Group email list and file upload options.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pr_requests_settings'),
+    'access arguments' => array('access administration pages'),
+  );
+
+  return $items;
+}
+
+/**
+ * Handler for PR Requests settings.
+ *
+ * Set e-mail list, max file uploads, accepted fiel extensions, max file size.
+ */
+function pr_requests_settings($form, &$form_state) {
+  drupal_set_title('PR Group request form settings');
+  $form['pr_requests_emails'] = array(
+    '#type' => 'textarea',
+    '#title' => t('PR Group email list:'),
+    '#default_value' => variable_get('pr_requests_emails', ''),
+    '#description' => t('Enter a valid email address. Separate multiple
+      with a comma'),
+  );
+
+  $form['pr_requests_files_limit'] = array(
+    '#type' => 'numberfield',
+    '#title' => t('Maximum allowable file uploads:'),
+    '#description' => t('Enter an upper limit of file attachments'),
+    '#default_value' => variable_get('pr_requests_files_limit', '3'),
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#maxlength' => 2,
+    '#attributes' => array(
+      'min' => 1,
+      'max' => 12,
+    ),
+  );
+
+  $form['pr_requests_file_extensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Valid file upload types:'),
+    '#default_value' => variable_get('pr_requests_file_extensions',
+      'gif jpg png doc docx pdf zip'),
+    '#description' => t('Restrict accepted file extensions, i.e. gif pdf zip'),
+  );
+
+  $form['pr_requests_file_maxsize'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum allowable file upload size:'),
+    '#description' => t('Enter a numeric file size between <b>1</b> and
+      <b>%php_limit</b>', array(
+        '%php_limit' => format_size(file_upload_max_size()),
+      )
+    ),
+    '#default_value' => variable_get('pr_requests_file_maxsize', '9'),
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#maxlength' => 3,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Add People|Permissions row entry + Modules "Permissions" link.
+ */
+function pr_requests_permission() {
+  return array(
+    'access pr requests' => array(
+      'title' => t('Access PR Requests'),
+    ),
+  );
+}
+
+/**
+ * Implements hook__settings_permission().
+ */
+function pr_requests_settings_permission() {
+  return array(
+    'access pr requests' => array(
+      'title' => t('Administer PR Requests'),
+    ),
+  );
+}
+
+/**
+ * Submit handler for PR Requests settings.
+ *
+ * RETURNS : TRUE when finished.
+ */
+function pr_requests_settings_submit($form, &$form_state) {
+  variable_set('pr_requests_emails',
+    $form_state['values']['pr_requests_emails']);
+  variable_set('pr_requests_file_extensions',
+    $form_state['values']['pr_requests_file_extensions']);
+  variable_set('pr_requests_file_maxsize',
+    $form_state['values']['pr_requests_file_maxsize']);
+
+  drupal_set_message('PR Requests Settings Saved.', $type = 'status');
+
+  return TRUE;
+}
+
+/**
+ * Implements PR Requests form creation.
+ */
+function pr_requests_form($form, &$form_state) {
+  drupal_set_title('PR Group Assistance Request');
+  $form['supervisor_approved'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Unit manager is aware of and supports this request.'),
+    '#prefix' => '<p class="instructions">To request assistance from the PR
+      group, please complete and submit this form. A confirmation email will be
+      sent upon receipt. If there are any follow up questions, or if consultation
+      is required, you will be notified. Please note that requests will be
+      prioritized. Once the request is approved, the appropriate individuals on
+      the PR Committee will complete the tasks involved by the agreed-upon date.
+      </p>',
+    '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array(
+         'pr-request-form-toggle',
+      ),
+    ),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="supervisor_approved"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['conditional-wrapper']['project'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Project Information:'),
+  );
+
+  $form['conditional-wrapper']['project']['deadline'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Deadline'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+  );
+
+  $form['conditional-wrapper']['project']['category'] = array(
+    '#type' => 'select',
+    '#title' => t('PR Category'),
+    '#options' => array(
+      'announcement' => t('Announcement'),
+      'event' => t('Event (General)'),
+      'teaching' => t('Teaching Session/Workshop'),
+      'eresource' => t('e-Resource'),
+      'services' => t('Services'),
+      'spaces' => t('Physical Spaces'),
+      'other' => t('Other'),
+    ),
+    '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper']['project']['other'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Please specify other category:'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="category"]' => array('value' => 'other'),
+      ),
+      'required' => array(
+        ':input[name="category"]' => array('value' => 'other'),
+      ),
+    ),
+  );
+
+  $form['conditional-wrapper']['project']['about'] = array(
+    '#type' => 'textarea',
+    '#title' => 'About the Project',
+    '#description' => 'Please provide any vital information concerning your
+      request. i.e. Dates, times, locations, product information, etc.',
+    '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper']['project']['content'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Content'),
+    '#description' => t('Content to be included with the PR Request. i.e.
+      information/images to include in Library News article, Library Feature,
+      Social Media Posts, etc.'),
+    '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper']['project']['target'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Target Audience'),
+    '#description' => t('i.e. Faculty, students, general public, UNB/STU,
+      etc.'),
+    '#required' => TRUE,
+  );
+
+  $my_file_limit = variable_get('pr_requests_files_limit');
+  $my_file_extensions = variable_get('pr_requests_file_extensions');
+  $my_file_maxsize = variable_get('pr_requests_file_maxsize');
+
+  $form['conditional-wrapper']['files'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Files'),
+    '#description' => t('<p>You may upload up to %my_file_limit files to
+      accompany your request. If you have more than %my_file_limitfiles,
+      you may upload a .zip file instead.<br />Permitted file extensions
+      include: <b>%my_file_extensions</b></p><p><b>Note:</b> the maximum file
+      size is %my_file_max_sizeMB</p>', array(
+        '%my_file_limit' => $my_file_limit,
+        '%my_file_extensions' => $my_file_extensions,
+        '%my_file_max_size' => $my_file_maxsize,
+      )
+    ),
+  );
+
+  $form['conditional-wrapper']['files']['file_input_container'] = array(
+    '#type' => 'container',
+    '#title' => 'File Input Container',
+    '#attributes' => array(
+      'id' => array(
+        'pr-requests-files-wrapper',
+      ),
+    ),
+  );
+
+  // Form widgets for public file uploads.
+  for ($i = 1; $i <= $my_file_limit; $i++) {
+    $form['conditional-wrapper']['files']['file_input_container']['file' . $i] = array(
+      '#title' => 'File' . $i,
+      '#title_display' => 'invisible',
+      '#type' => 'managed_file',
+      '#upload_location' => 'public://pr_requests/',
+      '#upload_validators' => array(
+        'file_validate_extensions' => array(
+          'gif jpg png doc docx pdf zip',
+        ),
+        'file_validate_size' => array(
+          $my_file_maxsize * 1024 * 1024,
+        ),
+      ),
+    );
+  }
+
+  $form['conditional-wrapper']['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send request'),
+    '#attributes' => array(
+      'class' => array(
+        'pr-requests-send-button'
+      ),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Implements PR Requests form validation.
+ */
+function pr_requests_form_validate($form, &$form_state) {
+  $mail = $form_state['values']['email'];
+  if (!valid_email_address($mail)) {
+    form_set_error('email', t('Please Enter a valid email address.'));
+  }
+  var_dump($form_state['values']);
+
+  return $form;
+}
+
+/**
+ * Implements PR Requests form submission.
+ */
+function pr_requests_form_submit($form, &$form_state) {
+  drupal_set_message(t('Your form has been submitted to the Fredericton PR
+      Group. We will send you a confirmation email shortly.'));
+}
