@@ -24,7 +24,7 @@ function pr_requests_menu() {
     'description' => 'A form used to request PR Group assistance.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_form'),
-    'access arguments' => array('access pr requests'),
+    'access arguments' => array('submit pr requests'),
   );
 
   $items['admin/config/pr-requests'] = array(
@@ -32,10 +32,21 @@ function pr_requests_menu() {
     'description' => 'Configure PR Group email list and file upload options.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_settings'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
   );
 
   return $items;
+}
+
+/**
+ * Add People|Permissions row entry + Modules "Permissions" link.
+ */
+function pr_requests_permission() {
+  return array(
+    'submit pr requests' => array(
+      'title' => t('Submit PR Requests'),
+    ),
+  );
 }
 
 /**
@@ -45,19 +56,25 @@ function pr_requests_menu() {
  */
 function pr_requests_settings($form, &$form_state) {
   drupal_set_title('PR Group request form settings');
-  $form['pr_requests_emails'] = array(
+  $form['pr_requests_email_list'] = array(
     '#type' => 'textarea',
     '#title' => t('PR Group email list:'),
-    '#default_value' => variable_get('pr_requests_emails', ''),
+    '#default_value' => variable_get('pr_requests_email_list', ''),
     '#description' => t('Enter a valid email address. Separate multiple
       with a comma'),
   );
 
-  $form['pr_requests_files_limit'] = array(
+  /* File upload settings group */
+  $form['file_uploads'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('File upload settings:'),
+  );
+
+  $form['file_uploads']['pr_requests_files_limit'] = array(
     '#type' => 'numberfield',
     '#title' => t('Maximum allowable file uploads:'),
     '#description' => t('Enter an upper limit of file attachments'),
-    '#default_value' => variable_get('pr_requests_files_limit', '3'),
+    '#default_value' => variable_get('pr_requests_files_limit', 3),
     '#element_validate' => array('element_validate_integer_positive'),
     '#maxlength' => 2,
     '#attributes' => array(
@@ -66,39 +83,55 @@ function pr_requests_settings($form, &$form_state) {
     ),
   );
 
-  $form['pr_requests_file_extensions'] = array(
+  $form['file_uploads']['pr_requests_file_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Valid file upload types:'),
-    '#default_value' => variable_get('pr_requests_file_extensions',
-      'gif jpg png doc docx pdf zip'),
-    '#description' => t('Restrict accepted file extensions, i.e. gif pdf zip'),
+    '#default_value' => variable_get('pr_requests_file_extensions', 'gif jpg png doc docx pdf zip'),
+    '#description' => t('Restrict accepted file extensions, i.e. gif jpg png doc docx pdf zip'),
   );
 
-  $form['pr_requests_file_maxsize'] = array(
-    '#type' => 'textfield',
+  $my_max_fsize = file_upload_max_size() / 1024 / 1024;
+  $form['file_uploads']['pr_requests_file_maxsize'] = array(
+    '#type' => 'numberfield',
     '#title' => t('Maximum allowable file upload size:'),
     '#description' => t('Enter a numeric file size between <b>1</b> and
-      <b>%php_limit</b>', array(
-        '%php_limit' => format_size(file_upload_max_size()),
-      )
+      <b>%limit</b>', array('%limit' => format_size(file_upload_max_size()))
     ),
-    '#default_value' => variable_get('pr_requests_file_maxsize', '9'),
+    '#default_value' => variable_get('pr_requests_file_maxsize', $my_max_fsize),
     '#element_validate' => array('element_validate_integer_positive'),
     '#maxlength' => 3,
+    '#attributes' => array(
+      'min' => 1,
+      'max' => $my_max_fsize,
+    ),
+  );
+
+  /* FogBugz credentials group */
+  $form['fogbugz_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Fogbugz credentials:'),
+  );
+
+  $form['fogbugz_settings']['pr_requests_fogbugz_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#default_value' => variable_get('pr_requests_fogbugz_email'),
+    '#size' => 50,
+    '#maxlength' => 50,
+    '#required' => TRUE,
+    '#prefix' => '<p>Enter the credentials for the FogBugz account that will be used for API calls in this module.</p>',
+  );
+
+  $form['fogbugz_settings']['pr_requests_fogbugz_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Password'),
+    '#default_value' => variable_get('pr_requests_fogbugz_password'),
+    '#size' => 50,
+    '#maxlength' => 50,
+    '#required' => TRUE,
   );
 
   return system_settings_form($form);
-}
-
-/**
- * Add People|Permissions row entry + Modules "Permissions" link.
- */
-function pr_requests_permission() {
-  return array(
-    'access pr requests' => array(
-      'title' => t('Access PR Requests'),
-    ),
-  );
 }
 
 /**
@@ -110,24 +143,6 @@ function pr_requests_settings_permission() {
       'title' => t('Administer PR Requests'),
     ),
   );
-}
-
-/**
- * Submit handler for PR Requests settings.
- *
- * RETURNS : TRUE when finished.
- */
-function pr_requests_settings_submit($form, &$form_state) {
-  variable_set('pr_requests_emails',
-    $form_state['values']['pr_requests_emails']);
-  variable_set('pr_requests_file_extensions',
-    $form_state['values']['pr_requests_file_extensions']);
-  variable_set('pr_requests_file_maxsize',
-    $form_state['values']['pr_requests_file_maxsize']);
-
-  drupal_set_message('PR Requests Settings Saved.', $type = 'status');
-
-  return TRUE;
 }
 
 /**
@@ -152,7 +167,7 @@ function pr_requests_form($form, &$form_state) {
     '#type' => 'container',
     '#attributes' => array(
       'class' => array(
-         'pr-request-form-toggle',
+        'pr-request-form-toggle',
       ),
     ),
     '#states' => array(
@@ -279,12 +294,140 @@ function pr_requests_form($form, &$form_state) {
     '#value' => t('Send request'),
     '#attributes' => array(
       'class' => array(
-        'pr-requests-send-button'
+        'pr-requests-send-button',
       ),
+    ),
+    '#submit' => array(
+      '_pr_requests_submit',
     ),
   );
 
   return $form;
+}
+
+/**
+ * Implements PR Requests form submission handler.
+ */
+function pr_requests_form_submit($form, &$form_state) {
+  $token = _pr_requests_get_fogbugz_token();
+  if ($token == NULL) {
+    drupal_set_message(t('Connection to FogBugz failed. If this error persists, please contact the site administrator.'), 'error');
+    return;
+  }
+  $success = _pr_requests_create_fogbugz_ticket($token, $form_state);
+  if ($success) {
+    drupal_set_message(t('Your request has been submitted to the PR Group. We will send you a confirmation email shortly.'));
+  }
+  else {
+    drupal_set_message(t('Your submission request was not successful. If this error persists, please contact the site administrator.'), 'error');
+  }
+}
+
+/**
+ * Generate and return FogBugz token.
+ *
+ * Authenticates Mr. Robot through the FogBugz API and generates a token for
+ * subsequent API calls.
+ *
+ * @return string
+ *   Token for FogBugz API calls
+ */
+function _pr_requests_get_fogbugz_token() {
+  $curl_handle = curl_init('http://support.lib.unb.ca/api.asp?cmd=logon');
+
+  curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($curl_handle, CURLOPT_POST, TRUE);
+  $ch_post_data = array(
+    'email' => variable_get('pr_requests_fogbugz_email'),
+    'password' => variable_get('pr_requests_fogbugz_password'),
+  );
+  curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $ch_post_data);
+
+  $curl_response = curl_exec($curl_handle);
+  $token = NULL;
+  if ($curl_response) {
+    $xml = simplexml_load_string($curl_response, 'SimpleXMLElement', LIBXML_NOCDATA);
+    $token = (string) $xml->token;
+  }
+  curl_close($curl_handle);
+
+  return $token;
+}
+
+/**
+ * Create a ticket in FogBugz system based on user input from the ticket form.
+ *
+ * @param string $token
+ *   Token for FogBugz API calls.
+ * @param array $form_state
+ *   Form state.
+ *
+ * @return bool
+ *   TRUE if ticket creation successfully returned a case ID, FALSE if not
+ */
+function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
+  $description = "Contact Information:\n" .
+                $form_state['values']['name'] . "\n" .
+                $form_state['values']['department'] . "\n" .
+                $form_state['values']['email'] . "\n" .
+                $form_state['values']['phone'] . "\n\nDeadline:\n" .
+                $form_state['values']['deadline'] . "\n\nAbout the project:\n" .
+                $form_state['values']['about'] . "\n\nGraphic material request:\n" .
+                $form_state['values']['graphic_material'] . "\n\nContent:\n" .
+                $form_state['values']['content'] . "\n\nTarget Audience:\n" .
+                $form_state['values']['target'] . "\n\n";
+
+  $ticket_information = array(
+    'project' => 'PR Requests',
+    'title' => 'PR Request from ' . $form_state['values']['name'],
+    'category' => 'PR Request',
+    'description' => $description,
+    'email' => $form_state['values']['name'] . "<" . $form_state['values']['email'] . ">",
+  );
+
+  $curl_handle = curl_init('http://support.lib.unb.ca/api.asp?cmd=new');
+  curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($curl_handle, CURLOPT_POST, TRUE);
+  curl_setopt($curl_handle, CURLOPT_HTTPHEADER, array("Content-Type:multipart/form-data"));
+  $ch_post_data = array(
+    'token' => $token,
+    'sProject' => $ticket_information['project'],
+    'sTitle' => $ticket_information['title'],
+    'sCategory' => $ticket_information['category'],
+    'sEvent' => $ticket_information['description'],
+    'sCustomerEmail' => $ticket_information['email'],
+    'ixMailbox' => 1,
+  );
+
+  $file_count = 0;
+  foreach ($form_state['values'] as $field_name => $fid) {
+    if (preg_match('/(file)\d/', $field_name) > 0 && $fid > 0) {
+      $file_count++;
+      $file = file_load($fid);
+      $file_uri = drupal_realpath($file->uri);
+      $ch_post_data['File' . $file_count] = new CurlFile($file_uri);
+    }
+  }
+  $ch_post_data['nFileCount'] = $file_count;
+
+  curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $ch_post_data);
+
+  // Makes actual connection to FogBugz
+  // $curl_response = curl_exec($curl_handle);
+  $success = FALSE;
+  $case_id = NULL;
+  if ($curl_response) {
+    $xml = simplexml_load_string($curl_response, 'SimpleXMLElement', LIBXML_NOCDATA);
+    $case_id = (string) $xml->case['ixBug'];
+    if ($case_id != NULL) {
+      $ticket_information['case_id'] = $case_id;
+      $success = TRUE;
+      _pr_requests_send_confirmation_email($token, $ticket_information);
+    }
+  }
+  // curl_close($curl_handle);
+  return $success;
+
 }
 
 /**
@@ -298,12 +441,4 @@ function pr_requests_form_validate($form, &$form_state) {
   var_dump($form_state['values']);
 
   return $form;
-}
-
-/**
- * Implements PR Requests form submission.
- */
-function pr_requests_form_submit($form, &$form_state) {
-  drupal_set_message(t('Your form has been submitted to the Fredericton PR
-      Group. We will send you a confirmation email shortly.'));
 }
