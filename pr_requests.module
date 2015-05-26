@@ -39,7 +39,7 @@ function pr_requests_menu() {
 }
 
 /**
- * Add PR Requests category settings for People|Permissions.
+ * Add PR Requests category settings to People|Permissions.
  */
 function pr_requests_permission() {
   return array(
@@ -53,7 +53,7 @@ function pr_requests_permission() {
 }
 
 /**
- * Handle access permissions to PR Requests settings.
+ * Implements PR Requests settings form access permissions.
  */
 function _pr_requests_settings_form_access() {
   if (user_access('admin pr requests') || user_access('administer site configuration')) {
@@ -64,6 +64,10 @@ function _pr_requests_settings_form_access() {
 
 /**
  * Form constructor for the PR Requests settings form.
+ *
+ * @see pr_requests_form_validate()
+ *
+ * @ingroup forms
  */
 function pr_requests_settings_form($form, &$form_state) {
   drupal_set_title('PR Group request form settings');
@@ -152,10 +156,6 @@ function pr_requests_settings_form($form, &$form_state) {
 
 /**
  * Form validation handler for pr_requests_settings_form().
- *
- * @see pr_requests_form_validate()
- *
- * @ingroup forms
  */
 function pr_requests_settings_form_validate($form, &$form_state) {
   $form_state['values']['pr_requests_email_list'] = preg_replace('/\s+/', '', $form_state['values']['pr_requests_email_list']);
@@ -177,7 +177,6 @@ function pr_requests_settings_form_validate($form, &$form_state) {
 /**
  * Form constructor for the PR Requests form.
  *
- * @see pr_requests_form_validate()
  * @see pr_requests_form_submit()
  *
  * @ingroup forms
