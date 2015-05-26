@@ -31,8 +31,8 @@ function pr_requests_menu() {
     'title' => 'PR Requests settings',
     'description' => 'Configure PR Group email list and file upload options.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('pr_requests_settings'),
-    'access arguments' => array('admin pr requests'),
+    'page arguments' => array('pr_requests_settings_form'),
+    'access callback' => '_pr_requests_settings_form_access',
   );
 
   return $items;
@@ -53,11 +53,19 @@ function pr_requests_permission() {
 }
 
 /**
- * Handler for PR Requests settings.
- *
- * Set e-mail list, max file uploads, accepted fiel extensions, max file size.
+ * Handle access permissions to PR Requests settings.
  */
-function pr_requests_settings($form, &$form_state) {
+function _pr_requests_settings_form_access() {
+  if (user_access('admin pr requests') || user_access('administer site configuration')) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Form constructor for the PR Requests settings form.
+ */
+function pr_requests_settings_form($form, &$form_state) {
   drupal_set_title('PR Group request form settings');
   $form['pr_requests_email_list'] = array(
     '#type' => 'textfield',
@@ -67,7 +75,6 @@ function pr_requests_settings($form, &$form_state) {
     '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),
   );
 
-  /* File upload settings group */
   $form['file_uploads'] = array(
     '#type' => 'fieldset',
     '#title' => t('File upload settings:'),
@@ -109,7 +116,6 @@ function pr_requests_settings($form, &$form_state) {
     ),
   );
 
-  /* FogBugz credentials group */
   $form['fogbugz_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Fogbugz credentials:'),
@@ -134,11 +140,47 @@ function pr_requests_settings($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  return system_settings_form($form);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#name' => 'save',
+    '#value' => t('Save settings'),
+  );
+  $form['#submit'][] = 'system_settings_form_submit';
+
+  return $form;
 }
 
 /**
- * Implements PR Requests form creation.
+ * Form validation handler for pr_requests_settings_form().
+ *
+ * @see pr_requests_form_validate()
+ *
+ * @ingroup forms
+ */
+function pr_requests_settings_form_validate($form, &$form_state) {
+  $form_state['values']['pr_requests_email_list'] = preg_replace('/\s+/', '', $form_state['values']['pr_requests_email_list']);
+  $form_state['values']['pr_requests_fogbugz_email'] = preg_replace('/\s+/', '', $form_state['values']['pr_requests_fogbugz_email']);
+  $email_list = explode(",", $form_state['values']['pr_requests_email_list']);
+
+  foreach ($email_list as $value) {
+    if (!valid_email_address($value)) {
+      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the PR Group email list (multiple addresss must be separated with a comma).'));
+    }
+  }
+
+  if (!valid_email_address($form_state['values']['pr_requests_fogbugz_email'])) {
+    form_set_error('pr_requests_fogbugz_email', t('Invalid email format: please correct the FogBugz e-mail.'));
+  }
+}
+
+
+/**
+ * Form constructor for the PR Requests form.
+ *
+ * @see pr_requests_form_validate()
+ * @see pr_requests_form_submit()
+ *
+ * @ingroup forms
  */
 function pr_requests_form($form, &$form_state) {
   drupal_set_title('PR Group Assistance Request');
@@ -337,7 +379,7 @@ function pr_requests_form($form, &$form_state) {
 }
 
 /**
- * Implements PR Requests form submission handler.
+ * Form submission handler for pr_requests_form().
  */
 function pr_requests_submit($form, &$form_state) {
   $token = _pr_requests_get_fogbugz_token();
@@ -416,6 +458,8 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
                   $form_state['values']['about'] . "\n\nContent:\n" .
                   $form_state['values']['content'] . "\n\nTarget Audience:\n" .
                   $form_state['values']['target'] . "\n";
+  /* add space after commas for readabiliy when have multiple email addresses */
+  $bcc = preg_replace('/,/', ', ', $form_state['values']['email_list']);
 
   $ticket_information = array(
     'project' => 'PR Requests',
@@ -423,7 +467,7 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     'category' => 'PR Request',
     'description' => $description,
     'email' => $form_state['values']['fullname'] . " <" . $form_state['values']['email'] . ">",
-    'email_list' => $form_state['values']['email_list'],
+    'email_list' => $bcc,
   );
 
   $curl_handle = curl_init('https://support.lib.unb.ca/api.asp?cmd=new');
@@ -452,7 +496,6 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
   $ch_post_data['nFileCount'] = $file_count;
 
   curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $ch_post_data);
-  // Make actual connection to FogBugz.
   $curl_response = curl_exec($curl_handle);
 
   $success = FALSE;
@@ -473,9 +516,6 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
 /**
  * Construct and send email notifications on successful submissions.
  *
- * Sends email message to the user and to those in the PR Group email list
- * (configured in the module settings) providing newly-created ticket details.
- *
  * @param string $token
  *   Token for FogBugz API calls.
  * @param array $ticket_information
@@ -485,7 +525,7 @@ function _pr_requests_send_confirmation_email($token, array $ticket_information)
   $message = "PR Request submitted. Reference number for this ticket is " . $ticket_information['case_id'] . ".\n\n";
   $message .= "PR Request Details:\n-------------------\n\n" . $ticket_information['description'] . "\n";
 
-  $curl_handle = curl_init('http://support.lib.unb.ca/api.asp?cmd=forward');
+  $curl_handle = curl_init('https://support.lib.unb.ca/api.asp?cmd=forward');
   curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($curl_handle, CURLOPT_POST, TRUE);
   $ch_post_data = array(
