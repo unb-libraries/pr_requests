@@ -52,7 +52,7 @@ function pr_requests_permission() {
 }
 
 /**
- * Implements PR Requests settings form access permissions.
+ * Access callback: pr_requests_settings_form.
  */
 function _pr_requests_settings_form_access() {
   if (user_access('admin pr requests') || user_access('administer site configuration')) {
