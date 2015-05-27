@@ -132,8 +132,10 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
  *   Associative array of information from the newly submitted ticket.
  */
 function _pr_requests_send_confirmation_email($token, array $ticket_information) {
-  $message = "PR Request submitted. Reference number for this ticket is " . $ticket_information['case_id'] . ".\n\n";
-  $message .= "PR Request Details:\n-------------------\n\n" . $ticket_information['description'] . "\n";
+  $message = "PR Request submitted. Reference number for this ticket is ";
+  $message .= $ticket_information['case_id'] . ".\n\n";
+  $message .= "PR Request Details:\n--------------------------\n\n";
+  $message .= $ticket_information['description'] . "\n";
 
   $curl_handle = curl_init('https://support.lib.unb.ca/api.asp?cmd=forward');
   curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
