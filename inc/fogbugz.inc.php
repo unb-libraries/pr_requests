@@ -75,7 +75,6 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     'project' => 'PR Requests',
     'title' => 'PR Request from ' . $form_state['values']['fullname'],
     'category' => 'PR Request',
-    'description' => $description,
     'email' => $form_state['values']['fullname'] . " <" . $form_state['values']['email'] . ">",
     'email_list' => $bcc,
   );
@@ -89,7 +88,6 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     'sProject' => $ticket_information['project'],
     'sTitle' => $ticket_information['title'],
     'sCategory' => $ticket_information['category'],
-    'sEvent' => $ticket_information['description'],
     'sCustomerEmail' => $ticket_information['email'],
     'ixMailbox' => 1,
   );
@@ -97,13 +95,20 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
   $file_count = 0;
   foreach ($form_state['values'] as $field_name => $fid) {
     if (preg_match('/(file)\d/', $field_name) > 0 && $fid > 0) {
+      if ($file_count == 0) {
+        $description .= "\nAttached Files:\n";
+      }
       $file_count++;
       $file = file_load($fid);
       $file_uri = drupal_realpath($file->uri);
       $ch_post_data['File' . $file_count] = new CurlFile($file_uri);
+      $description .= $file->filename . "\n";
     }
   }
   $ch_post_data['nFileCount'] = $file_count;
+
+  // Both FogBugz array & Ticket info array need final description text.
+  $ch_post_data['sEvent'] = $ticket_information['description'] = $description;
 
   curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $ch_post_data);
   $curl_response = curl_exec($curl_handle);
