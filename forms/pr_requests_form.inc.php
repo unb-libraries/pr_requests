@@ -182,7 +182,7 @@ function pr_requests_form($form, &$form_state) {
   /* Construct full name from user account name fields. */
   $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
   $fullname = trim(implode(' ', $fullname));
-  if (!isset($fullname)) {
+  if (trim($fullname) != '') {
     /* Use username as backup (required field for user account). */
     $fullname = $uname;
   }
