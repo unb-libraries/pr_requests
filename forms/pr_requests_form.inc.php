@@ -183,7 +183,7 @@ function pr_requests_form($form, &$form_state) {
   // backup.
   $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
   $fullname = trim(implode(' ', $fullname));
-  if (trim($fullname) != '') {
+  if (trim($fullname) == '') {
     $fullname = $uname;
   }
 
