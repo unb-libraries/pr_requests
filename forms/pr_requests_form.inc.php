@@ -111,21 +111,21 @@ function pr_requests_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $my_file_limit = variable_get('pr_requests_files_limit');
-  $my_file_extensions = variable_get('pr_requests_file_extensions');
-  $my_file_maxsize = variable_get('pr_requests_file_maxsize');
+  $request_file_limit = variable_get('pr_requests_files_limit');
+  $request_file_extns = variable_get('pr_requests_file_extensions');
+  $request_file_max_size = variable_get('pr_requests_file_maxsize');
 
   $form['conditional-wrapper']['files'] = array(
     '#type' => 'fieldset',
     '#title' => t('Files'),
-    '#description' => t('<p>You may upload up to %my_file_limit files to
-      accompany your request. If you have more than %my_file_limitfiles,
+    '#description' => t('<p>You may upload up to %request_file_limit files to
+      accompany your request. If you have more than %request_file_limitfiles,
       you may upload a .zip file instead.<br />Permitted file extensions
-      include: <b>%my_file_extensions</b></p><p><b>Note:</b> the maximum file
+      include: <b>%request_file_extns</b></p><p><b>Note:</b> the maximum file
       size is %my_file_max_sizeMB</p>', array(
-        '%my_file_limit' => $my_file_limit,
-        '%my_file_extensions' => $my_file_extensions,
-        '%my_file_max_size' => $my_file_maxsize,
+        '%request_file_limit' => $request_file_limit,
+        '%request_file_extns' => $request_file_extns,
+        '%my_file_max_size' => $request_file_max_size,
       )
     ),
   );
@@ -141,7 +141,7 @@ function pr_requests_form($form, &$form_state) {
   );
 
   // Form widgets for public file uploads.
-  for ($i = 1; $i <= $my_file_limit; $i++) {
+  for ($i = 1; $i <= $request_file_limit; $i++) {
     $form['conditional-wrapper']['files']['file_input_container']['file' . $i] = array(
       '#title' => 'File' . $i,
       '#title_display' => 'invisible',
@@ -152,7 +152,7 @@ function pr_requests_form($form, &$form_state) {
           'gif jpg png doc docx pdf zip',
         ),
         'file_validate_size' => array(
-          $my_file_maxsize * 1024 * 1024,
+          $request_file_max_size * 1024 * 1024,
         ),
       ),
     );
