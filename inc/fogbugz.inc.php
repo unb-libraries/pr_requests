@@ -58,7 +58,8 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
   $description .= "\nDeadline:\n" .
     $form_state['values']['deadline'] . "\n\nPR Category:\n" .
     $form_state['values']['category'];
-  /* If PR Category=Other, include required text from conditional form input */
+
+  // If PR Category=Other, include required text from conditional form input.
   if ($form_state['values']['category'] == 'Other') {
     $description .= ": " . $form_state['values']['other'];
   }
@@ -66,7 +67,8 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     $form_state['values']['about'] . "\n\nContent:\n" .
     $form_state['values']['content'] . "\n\nTarget Audience:\n" .
     $form_state['values']['target'] . "\n";
-  /* add space after commas for readabiliy when have multiple email addresses */
+
+  // Add space after commas for readabiliy when have multiple email addresses.
   $bcc = preg_replace('/,/', ', ', $form_state['values']['email_list']);
 
   $ticket_information = array(

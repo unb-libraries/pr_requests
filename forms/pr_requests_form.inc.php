@@ -141,7 +141,7 @@ function pr_requests_form($form, &$form_state) {
     ),
   );
 
-  // Form widgets for public file uploads.
+  // Generate file upload widgets.
   for ($i = 1; $i <= $request_file_limit; $i++) {
     $form['conditional-wrapper']['files']['file_input_container']['file' . $i] = array(
       '#title' => 'File' . $i,
@@ -172,14 +172,15 @@ function pr_requests_form($form, &$form_state) {
     ),
   );
 
-  /* Assemble contact information fron authenticated user for FogBugz, etc. in
-  hidden form inputs in case we ever need to make these values overrideable via
-  visible pre-populated inputs. */
+  // Assemble contact information fron authenticated user for FogBugz, etc. in
+  // hidden form inputs in case we ever need to make these values overrideable
+  // via visible pre-populated inputs.
   global $user;
   $user_profile = entity_metadata_wrapper('user', user_load($user->uid));
   $uname = $user_profile->name->value();
 
-  /* Construct full name from user account name fields, using username as backup  */
+  // Construct full name from user account name fields, using Drupal username as
+  // backup.
   $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
   $fullname = trim(implode(' ', $fullname));
   if (trim($fullname) != '') {
