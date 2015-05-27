@@ -12,6 +12,8 @@
  * @ingroup forms
  */
 function pr_requests_form($form, &$form_state) {
+  $form = array();
+
   drupal_set_title(
     t('PR Group Assistance Request')
   );
