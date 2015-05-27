@@ -8,5 +8,6 @@ dependencies[] = date_popup
 dependencies[] = elements
 dependencies[] = file
 dependencies[] = text
+dependencies[] = number
 
 configure = admin/config/pr-requests
