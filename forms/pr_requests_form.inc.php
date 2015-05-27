@@ -18,16 +18,17 @@ function pr_requests_form($form, &$form_state) {
     t('PR Group Assistance Request')
   );
 
+  $unit_approval_message = t('To request assistance from the PR
+      group, please complete and submit this form. A confirmation email will be
+      sent upon receipt. If there are any follow up questions, or if
+      consultation is required, you will be notified. Please note that requests
+      will be prioritized. Once the request is approved, the appropriate
+      individuals on the PR Committee will complete the tasks involved by the
+      agreed-upon date.');
   $form['supervisor_approved'] = array(
     '#type' => 'checkbox',
     '#title' => t('Unit manager is aware of and supports this request.'),
-    '#prefix' => '<p class="instructions">To request assistance from the PR
-      group, please complete and submit this form. A confirmation email will be
-      sent upon receipt. If there are any follow up questions, or if consultation
-      is required, you will be notified. Please note that requests will be
-      prioritized. Once the request is approved, the appropriate individuals on
-      the PR Committee will complete the tasks involved by the agreed-upon date.
-      </p>',
+    '#prefix' => "<p class=\"instructions\">$unit_approval_message</p>",
     '#required' => TRUE,
   );
 
@@ -89,8 +90,8 @@ function pr_requests_form($form, &$form_state) {
   $form['conditional-wrapper']['project']['about'] = array(
     '#type' => 'textarea',
     '#title' => 'About the Project',
-    '#description' => 'Please provide any vital information concerning your
-      request. i.e. Dates, times, locations, product information, etc.',
+    '#description' => t('Please provide any vital information concerning your
+      request. i.e. Dates, times, locations, product information, etc.'),
     '#required' => TRUE,
   );
 
