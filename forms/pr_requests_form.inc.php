@@ -211,6 +211,8 @@ function pr_requests_form($form, &$form_state) {
  * Form submission handler for pr_requests_form().
  */
 function pr_requests_submit($form, &$form_state) {
+  module_load_include('php', 'pr_requests', 'inc/fogbugz.inc');
+
   $token = _pr_requests_get_fogbugz_token();
   if ($token == NULL) {
     drupal_set_message(t('Connection to FogBugz failed. If this error persists, please contact the site administrator.'), 'error');
