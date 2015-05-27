@@ -179,15 +179,16 @@ function pr_requests_form($form, &$form_state) {
   $user_profile = entity_metadata_wrapper('user', user_load($user->uid));
   $uname = $user_profile->name->value();
 
-  // Construct full name from user account name fields, using Drupal username as
-  // backup.
+  // Construct full name from user account name fields, using Drupal username
+  // (i.e. UNB userid) as backup.
   $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
   $fullname = trim(implode(' ', $fullname));
   if (trim($fullname) == '') {
     $fullname = $uname;
   }
 
-  $myemail = $uname . '@unb.ca';
+  // The userid@unb.ca address is constant and prefered over fname.lname@unb.ca.
+  $user_email = $uname . '@unb.ca';
 
   $form['fullname'] = array(
     '#type' => 'hidden',
@@ -195,7 +196,7 @@ function pr_requests_form($form, &$form_state) {
   );
   $form['email'] = array(
     '#type' => 'hidden',
-    '#value' => $myemail,
+    '#value' => $user_email,
   );
   $form['department'] = array(
     '#type' => 'hidden',
