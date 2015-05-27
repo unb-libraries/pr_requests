@@ -14,7 +14,7 @@
 
 <?php
 /**
- * Implements PR Requests hook_menu().
+ * Implements hook_menu().
  */
 function pr_requests_menu() {
   $items = array();
@@ -41,7 +41,7 @@ function pr_requests_menu() {
 }
 
 /**
- * Add PR Requests category settings to People|Permissions.
+ * Implements hook_permission().
  */
 function pr_requests_permission() {
   return array(
