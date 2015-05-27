@@ -24,6 +24,7 @@ function pr_requests_menu() {
     'description' => 'A form used to request PR Group assistance.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_form'),
+    'file' => 'forms/pr_requests_form.inc.php',
     'access arguments' => array('submit pr requests'),
   );
 
@@ -32,6 +33,7 @@ function pr_requests_menu() {
     'description' => 'Configure PR Group email list and file upload options.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_settings_form'),
+    'file' => 'forms/pr_requests_settings_form.inc.php',
     'access callback' => '_pr_requests_settings_form_access',
   );
 
@@ -60,339 +62,6 @@ function _pr_requests_settings_form_access() {
     return TRUE;
   }
   return FALSE;
-}
-
-/**
- * Form constructor for the PR Requests settings form.
- *
- * @see pr_requests_form_validate()
- *
- * @ingroup forms
- */
-function pr_requests_settings_form($form, &$form_state) {
-  drupal_set_title('PR Group request form settings');
-  $form['pr_requests_email_list'] = array(
-    '#type' => 'textfield',
-    '#title' => t('PR Group email list:'),
-    '#size' => '110',
-    '#default_value' => variable_get('pr_requests_email_list', ''),
-    '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),
-  );
-
-  $form['file_uploads'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('File upload settings:'),
-  );
-
-  $form['file_uploads']['pr_requests_files_limit'] = array(
-    '#type' => 'numberfield',
-    '#title' => t('Maximum allowable file uploads:'),
-    '#description' => t('Enter an upper limit of file attachments'),
-    '#default_value' => variable_get('pr_requests_files_limit', 3),
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#maxlength' => 2,
-    '#attributes' => array(
-      'min' => 1,
-      'max' => 12,
-    ),
-  );
-
-  $form['file_uploads']['pr_requests_file_extensions'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Valid file upload types:'),
-    '#default_value' => variable_get('pr_requests_file_extensions', 'gif jpg png doc docx pdf zip'),
-    '#description' => t('Restrict accepted file extensions, i.e. gif jpg png doc docx pdf zip'),
-  );
-
-  $my_max_fsize = file_upload_max_size() / 1024 / 1024;
-  $form['file_uploads']['pr_requests_file_maxsize'] = array(
-    '#type' => 'numberfield',
-    '#title' => t('Maximum allowable file upload size:'),
-    '#description' => t('Enter a numeric file size between <b>1</b> and
-      <b>%limit</b>', array('%limit' => format_size(file_upload_max_size()))
-    ),
-    '#default_value' => variable_get('pr_requests_file_maxsize', $my_max_fsize),
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#maxlength' => 3,
-    '#attributes' => array(
-      'min' => 1,
-      'max' => $my_max_fsize,
-    ),
-  );
-
-  $form['fogbugz_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Fogbugz credentials:'),
-  );
-
-  $form['fogbugz_settings']['pr_requests_fogbugz_email'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Email'),
-    '#default_value' => variable_get('pr_requests_fogbugz_email'),
-    '#size' => 50,
-    '#maxlength' => 50,
-    '#required' => TRUE,
-    '#prefix' => '<p>Enter the credentials for the FogBugz account that will be used for API calls in this module.</p>',
-  );
-
-  $form['fogbugz_settings']['pr_requests_fogbugz_password'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Password'),
-    '#default_value' => variable_get('pr_requests_fogbugz_password'),
-    '#size' => 50,
-    '#maxlength' => 50,
-    '#required' => TRUE,
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#name' => 'save',
-    '#value' => t('Save settings'),
-  );
-  $form['#submit'][] = 'system_settings_form_submit';
-
-  return $form;
-}
-
-/**
- * Form validation handler for pr_requests_settings_form().
- */
-function pr_requests_settings_form_validate($form, &$form_state) {
-  $form_state['values']['pr_requests_email_list'] = preg_replace('/\s+/', '', $form_state['values']['pr_requests_email_list']);
-  $form_state['values']['pr_requests_fogbugz_email'] = preg_replace('/\s+/', '', $form_state['values']['pr_requests_fogbugz_email']);
-  $email_list = explode(",", $form_state['values']['pr_requests_email_list']);
-
-  foreach ($email_list as $value) {
-    if (!valid_email_address($value)) {
-      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the PR Group email list (multiple addresss must be separated with a comma).'));
-    }
-  }
-
-  if (!valid_email_address($form_state['values']['pr_requests_fogbugz_email'])) {
-    form_set_error('pr_requests_fogbugz_email', t('Invalid email format: please correct the FogBugz e-mail.'));
-  }
-}
-
-
-/**
- * Form constructor for the PR Requests form.
- *
- * @see pr_requests_form_submit()
- *
- * @ingroup forms
- */
-function pr_requests_form($form, &$form_state) {
-  drupal_set_title('PR Group Assistance Request');
-  $form['supervisor_approved'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Unit manager is aware of and supports this request.'),
-    '#prefix' => '<p class="instructions">To request assistance from the PR
-      group, please complete and submit this form. A confirmation email will be
-      sent upon receipt. If there are any follow up questions, or if consultation
-      is required, you will be notified. Please note that requests will be
-      prioritized. Once the request is approved, the appropriate individuals on
-      the PR Committee will complete the tasks involved by the agreed-upon date.
-      </p>',
-    '#required' => TRUE,
-  );
-
-  $form['conditional-wrapper'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array(
-        'pr-request-form-toggle',
-      ),
-    ),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="supervisor_approved"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-
-  $form['conditional-wrapper']['project'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Project Information:'),
-  );
-
-  $form['conditional-wrapper']['project']['deadline'] = array(
-    '#type' => 'date_popup',
-    '#title' => t('Deadline'),
-    '#required' => TRUE,
-    '#date_format' => 'Y-m-d',
-  );
-
-  $form['conditional-wrapper']['project']['category'] = array(
-    '#type' => 'select',
-    '#title' => t('PR Category'),
-    '#options' => array(
-      'Announcement' => t('Announcement'),
-      'Event' => t('Event (General)'),
-      'Teaching Session/Workshop' => t('Teaching Session/Workshop'),
-      'e-Resource' => t('e-Resource'),
-      'Services' => t('Services'),
-      'Physical Spaces' => t('Physical Spaces'),
-      'Other' => t('Other'),
-    ),
-    '#required' => TRUE,
-  );
-
-  $form['conditional-wrapper']['project']['other'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Please specify other category:'),
-    '#default_value' => NULL,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="category"]' => array('value' => 'Other'),
-      ),
-      'required' => array(
-        ':input[name="category"]' => array('value' => 'Other'),
-      ),
-    ),
-  );
-
-  $form['conditional-wrapper']['project']['about'] = array(
-    '#type' => 'textarea',
-    '#title' => 'About the Project',
-    '#description' => 'Please provide any vital information concerning your
-      request. i.e. Dates, times, locations, product information, etc.',
-    '#required' => TRUE,
-  );
-
-  $form['conditional-wrapper']['project']['content'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Content'),
-    '#description' => t('Content to be included with the PR Request. i.e.
-      information/images to include in Library News article, Library Feature,
-      Social Media Posts, etc.'),
-    '#required' => TRUE,
-  );
-
-  $form['conditional-wrapper']['project']['target'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Target Audience'),
-    '#description' => t('i.e. Faculty, students, general public, UNB/STU,
-      etc.'),
-    '#required' => TRUE,
-  );
-
-  $my_file_limit = variable_get('pr_requests_files_limit');
-  $my_file_extensions = variable_get('pr_requests_file_extensions');
-  $my_file_maxsize = variable_get('pr_requests_file_maxsize');
-
-  $form['conditional-wrapper']['files'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Files'),
-    '#description' => t('<p>You may upload up to %my_file_limit files to
-      accompany your request. If you have more than %my_file_limitfiles,
-      you may upload a .zip file instead.<br />Permitted file extensions
-      include: <b>%my_file_extensions</b></p><p><b>Note:</b> the maximum file
-      size is %my_file_max_sizeMB</p>', array(
-        '%my_file_limit' => $my_file_limit,
-        '%my_file_extensions' => $my_file_extensions,
-        '%my_file_max_size' => $my_file_maxsize,
-      )
-    ),
-  );
-
-  $form['conditional-wrapper']['files']['file_input_container'] = array(
-    '#type' => 'container',
-    '#title' => 'File Input Container',
-    '#attributes' => array(
-      'id' => array(
-        'pr-requests-files-wrapper',
-      ),
-    ),
-  );
-
-  // Form widgets for public file uploads.
-  for ($i = 1; $i <= $my_file_limit; $i++) {
-    $form['conditional-wrapper']['files']['file_input_container']['file' . $i] = array(
-      '#title' => 'File' . $i,
-      '#title_display' => 'invisible',
-      '#type' => 'managed_file',
-      '#upload_location' => 'public://pr_requests/',
-      '#upload_validators' => array(
-        'file_validate_extensions' => array(
-          'gif jpg png doc docx pdf zip',
-        ),
-        'file_validate_size' => array(
-          $my_file_maxsize * 1024 * 1024,
-        ),
-      ),
-    );
-  }
-
-  $form['conditional-wrapper']['submit_button'] = array(
-    '#type' => 'submit',
-    '#value' => t('Send request'),
-    '#attributes' => array(
-      'class' => array(
-        'pr-requests-send-button',
-      ),
-    ),
-    '#submit' => array(
-      'pr_requests_submit',
-    ),
-  );
-
-  /* Assemble contact information fron authenticated user for FogBugz, etc. in
-  hidden form inputs in case we ever need to make these values overrideable via
-  visible pre-populated inputs. */
-  global $user;
-  $user_profile = entity_metadata_wrapper('user', user_load($user->uid));
-  $uname = $user_profile->name->value();
-
-  /* Construct full name from user account name fields. */
-  $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
-  $fullname = trim(implode(' ', $fullname));
-  if (!isset($fullname)) {
-    /* Use username as backup (required field for user account). */
-    $fullname = $uname;
-  }
-
-  $myemail = $uname . '@unb.ca';
-
-  $form['fullname'] = array(
-    '#type' => 'hidden',
-    '#value' => $fullname,
-  );
-  $form['email'] = array(
-    '#type' => 'hidden',
-    '#value' => $myemail,
-  );
-  $form['department'] = array(
-    '#type' => 'hidden',
-    '#value' => $user_profile->field_position_title->value(),
-  );
-  $form['phone'] = array(
-    '#type' => 'hidden',
-    '#value' => $user_profile->field_phone_number->value(),
-  );
-  $form['email_list'] = array(
-    '#type' => 'hidden',
-    '#value' => variable_get('pr_requests_email_list'),
-  );
-
-  return $form;
-}
-
-/**
- * Form submission handler for pr_requests_form().
- */
-function pr_requests_submit($form, &$form_state) {
-  $token = _pr_requests_get_fogbugz_token();
-  if ($token == NULL) {
-    drupal_set_message(t('Connection to FogBugz failed. If this error persists, please contact the site administrator.'), 'error');
-    return;
-  }
-  $success = _pr_requests_create_fogbugz_ticket($token, $form_state);
-  if ($success) {
-    drupal_set_message(t('Your request has been submitted to the PR Group. We will send you a confirmation email shortly.'));
-  }
-  else {
-    drupal_set_message(t('Your submission request was not successful. If this error persists, please contact the site administrator.'), 'error');
-  }
 }
 
 /**
@@ -447,16 +116,16 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     $description .= $form_state['values']['phone'] . "\n";
   }
   $description .= "\nDeadline:\n" .
-                  $form_state['values']['deadline'] . "\n\nPR Category:\n" .
-                  $form_state['values']['category'];
+    $form_state['values']['deadline'] . "\n\nPR Category:\n" .
+    $form_state['values']['category'];
   /* If PR Category=Other, include required text from conditional form input */
   if ($form_state['values']['category'] == 'Other') {
     $description .= ": " . $form_state['values']['other'];
   }
   $description .= "\n\nAbout the Project:\n" .
-                  $form_state['values']['about'] . "\n\nContent:\n" .
-                  $form_state['values']['content'] . "\n\nTarget Audience:\n" .
-                  $form_state['values']['target'] . "\n";
+    $form_state['values']['about'] . "\n\nContent:\n" .
+    $form_state['values']['content'] . "\n\nTarget Audience:\n" .
+    $form_state['values']['target'] . "\n";
   /* add space after commas for readabiliy when have multiple email addresses */
   $bcc = preg_replace('/,/', ', ', $form_state['values']['email_list']);
 
@@ -522,7 +191,7 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
  */
 function _pr_requests_send_confirmation_email($token, array $ticket_information) {
   $message = "PR Request submitted. Reference number for this ticket is " . $ticket_information['case_id'] . ".\n\n";
-  $message .= "PR Request Details:\n---------------------------\n\n" . $ticket_information['description'] . "\n";
+  $message .= "PR Request Details:\n-------------------\n\n" . $ticket_information['description'] . "\n";
 
   $curl_handle = curl_init('https://support.lib.unb.ca/api.asp?cmd=forward');
   curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
