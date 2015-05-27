@@ -179,11 +179,10 @@ function pr_requests_form($form, &$form_state) {
   $user_profile = entity_metadata_wrapper('user', user_load($user->uid));
   $uname = $user_profile->name->value();
 
-  /* Construct full name from user account name fields. */
+  /* Construct full name from user account name fields, using username as backup  */
   $fullname = array($user_profile->field_first_name->value(), $user_profile->field_last_name->value());
   $fullname = trim(implode(' ', $fullname));
   if (trim($fullname) != '') {
-    /* Use username as backup (required field for user account). */
     $fullname = $uname;
   }
 
