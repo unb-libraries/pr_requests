@@ -12,7 +12,10 @@
  * @ingroup forms
  */
 function pr_requests_form($form, &$form_state) {
-  drupal_set_title('PR Group Assistance Request');
+  drupal_set_title(
+    t('PR Group Assistance Request')
+  );
+
   $form['supervisor_approved'] = array(
     '#type' => 'checkbox',
     '#title' => t('Unit manager is aware of and supports this request.'),

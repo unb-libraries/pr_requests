@@ -12,7 +12,10 @@
  * @ingroup forms
  */
 function pr_requests_settings_form($form, &$form_state) {
-  drupal_set_title('PR Group request form settings');
+  drupal_set_title(
+    t('PR Group request form settings')
+  );
+
   $form['pr_requests_email_list'] = array(
     '#type' => 'textfield',
     '#title' => t('PR Group email list:'),
