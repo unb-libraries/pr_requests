@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * PR Requests Install File for Drupal 7.x.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function pr_requests_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+
+  if ($phase == 'runtime') {
+    $email_list = variable_get('pr_requests_email_list');
+    $fogbugz_user = variable_get('pr_requests_fogbugz_email');
+    $fogbugz_pass = variable_get('pr_requests_fogbugz_password');
+
+    if ($email_list == NULL || $fogbugz_user == NULL || $fogbugz_pass == NULL) {
+      $requirements['pr_requests'] = array(
+        'description' => $t('Please configure all required form fields on the <a href="@settings_form">PR Request settings</a> page.',
+        array('@settings_form' => url('admin/config/pr-requests'))),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => $t('Not configured'),
+      );
+    }
+    else {
+      $requirements['pr_requests']['value'] = $t('Configured');
+    }
+
+    $requirements['pr_requests']['title'] = $t('PR Requests settings');
+  }
+
+  return $requirements;
+}
