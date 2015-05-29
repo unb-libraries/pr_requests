@@ -24,6 +24,7 @@ function pr_requests_settings_form($form, &$form_state) {
     '#size' => '110',
     '#default_value' => variable_get('pr_requests_email_list', ''),
     '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),
+    '#required' => TRUE,
   );
 
   $form['file_uploads'] = array(

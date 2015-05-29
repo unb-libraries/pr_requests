@@ -18,6 +18,15 @@ function pr_requests_form($form, &$form_state) {
     t('PR Group Assistance Request')
   );
 
+  // Check if PR Requests settings required fields have been completed.
+  $pr_settings_email_list = variable_get('pr_requests_email_list');
+  $pr_settings_fb_user = variable_get('pr_requests_email_list');
+  $pr_settings_fb_pass = variable_get('pr_requests_email_list');
+  if ($pr_settings_email_list == NULL || $pr_settings_fb_user == NULL || $pr_settings_fb_pass == NULL) {
+    drupal_set_message(t('PR Requests configuration is not yet complete, please contact the site administrator.'), 'error');
+    return;
+  }
+
   $unit_approval_message = t('To request assistance from the PR
       group, please complete and submit this form. A confirmation email will be
       sent upon receipt. If there are any follow up questions, or if
@@ -206,9 +215,10 @@ function pr_requests_form($form, &$form_state) {
     '#type' => 'hidden',
     '#value' => $user_profile->field_phone_number->value(),
   );
+
   $form['email_list'] = array(
     '#type' => 'hidden',
-    '#value' => variable_get('pr_requests_email_list'),
+    '#value' => $pr_settings_email_list,
   );
 
   return $form;
