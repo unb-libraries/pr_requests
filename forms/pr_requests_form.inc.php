@@ -20,8 +20,8 @@ function pr_requests_form($form, &$form_state) {
 
   // Check if PR Requests settings required fields have been completed.
   $pr_settings_email_list = variable_get('pr_requests_email_list');
-  $pr_settings_fb_user = variable_get('pr_requests_email_list');
-  $pr_settings_fb_pass = variable_get('pr_requests_email_list');
+  $pr_settings_fb_user = variable_get('pr_requests_fogbugz_email');
+  $pr_settings_fb_pass = variable_get('pr_requests_fogbugz_password');
   if ($pr_settings_email_list == NULL || $pr_settings_fb_user == NULL || $pr_settings_fb_pass == NULL) {
     drupal_set_message(t('PR Requests configuration is not yet complete, please contact the site administrator.'), 'error');
     return;
