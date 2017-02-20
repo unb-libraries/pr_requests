@@ -18,6 +18,11 @@ function pr_requests_form($form, &$form_state) {
     t('Design & PR Requests (UNBF)')
   );
 
+  $unit_approval_message = t('To request Graphic Design support and/or assistance from the PR group, please complete and submit this form.
+  A confirmation email will be sent upon receipt. If there are any follow up questions, or if consultation is required, you will be notified.
+  Please note that requests will be prioritized. Once the request is approved, the appropriate individuals will complete the tasks involved
+  by the agreed-upon deadline. Ideally 2 - 4 weeks lead-time is recommended for promotional campaigns/assistance with events/workshops.');
+
   // Check if PR Requests settings required fields have been completed.
   $pr_settings_email_list = variable_get('pr_requests_email_list');
   $pr_settings_fb_user = variable_get('pr_requests_fogbugz_email');
@@ -67,14 +72,15 @@ function pr_requests_form($form, &$form_state) {
 
   $form['conditional-wrapper']['project']['category'] = array(
     '#type' => 'select',
-    '#title' => t('PR Category'),
+    '#title' => t('Category'),
     '#options' => array(
       'Announcement' => t('Announcement'),
-      'Event' => t('Event (General)'),
+      'Event' => t('Event'),
       'Teaching Session/Workshop' => t('Teaching Session/Workshop'),
-      'e-Resource' => t('e-Resource'),
       'Services' => t('Services'),
-      'Physical Spaces' => t('Physical Spaces'),
+      'e-Resource' => t('e-Resource'),
+      'Physical Space' => t('Physical Space'),
+      'Web Design' => t('Web Design'),
       'Other' => t('Other'),
     ),
     '#required' => TRUE,
@@ -98,16 +104,21 @@ function pr_requests_form($form, &$form_state) {
     '#type' => 'textarea',
     '#title' => 'About the Project',
     '#description' => t('Please provide any vital information concerning your
-      request. i.e. Dates, times, locations, product information, etc.'),
+      request. i.e. dates, times, locations, product information, etc.'),
+    '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper']['project']['graphic'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Graphic material',
+    '#description' => t('i.e. brochure, poster, website design, image, etc.'),
     '#required' => TRUE,
   );
 
   $form['conditional-wrapper']['project']['content'] = array(
     '#type' => 'textarea',
     '#title' => t('Content'),
-    '#description' => t('Content to be included with the PR Request. i.e.
-      information/images to include in Library News article, Library Feature,
-      Social Media Posts, etc.'),
+    '#description' => t('Please provide necessary: text, images, logos, date, themes, any specific sizes/dimensions, etc.'),
     '#required' => TRUE,
   );
 
