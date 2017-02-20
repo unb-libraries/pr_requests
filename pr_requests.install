@@ -19,7 +19,7 @@ function pr_requests_requirements($phase) {
 
     if ($email_list == NULL || $fogbugz_user == NULL || $fogbugz_pass == NULL) {
       $requirements['pr_requests'] = array(
-        'description' => $t('Please configure all required form fields on the <a href="@settings_form">PR Request settings</a> page.',
+        'description' => $t('Please configure all required form fields on the <a href="@settings_form">Design & PR Request settings</a> page.',
         array('@settings_form' => url('admin/config/pr-requests'))),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Not configured'),
@@ -29,7 +29,7 @@ function pr_requests_requirements($phase) {
       $requirements['pr_requests']['value'] = $t('Configured');
     }
 
-    $requirements['pr_requests']['title'] = $t('PR Requests settings');
+    $requirements['pr_requests']['title'] = $t('Design & PR Requests settings');
   }
 
   return $requirements;

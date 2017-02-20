@@ -15,12 +15,12 @@ function pr_requests_settings_form($form, &$form_state) {
   $form = array();
 
   drupal_set_title(
-    t('PR Group request form settings')
+    t('Design & PR Request form settings')
   );
 
   $form['pr_requests_email_list'] = array(
     '#type' => 'textfield',
-    '#title' => t('PR Group email list:'),
+    '#title' => t('Design & PR Group email list:'),
     '#size' => '110',
     '#default_value' => variable_get('pr_requests_email_list', ''),
     '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),

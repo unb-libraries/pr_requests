@@ -15,10 +15,9 @@
  */
 function pr_requests_menu() {
   $items = array();
-
   $items['pr-requests'] = array(
-    'title' => 'PR Requests',
-    'description' => 'A form used to request PR Group assistance.',
+    'title' => 'Design & PR Requests',
+    'description' => 'A form used to submit Design and PR Group requests.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_form'),
     'file' => 'forms/pr_requests_form.inc.php',
@@ -26,8 +25,8 @@ function pr_requests_menu() {
   );
 
   $items['admin/config/pr-requests'] = array(
-    'title' => 'PR Requests settings',
-    'description' => 'Configure PR Group email list and file upload options.',
+    'title' => 'Design & PR Requests settings',
+    'description' => 'Configure Design & PR Group email list and file upload options.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_settings_form'),
     'file' => 'forms/pr_requests_settings_form.inc.php',
@@ -43,10 +42,10 @@ function pr_requests_menu() {
 function pr_requests_permission() {
   return array(
     'submit pr requests' => array(
-      'title' => t('Submit PR Requests'),
+      'title' => t('Submit Design & PR Requests'),
     ),
     'admin pr requests' => array(
-      'title' => t('Administer PR Requests Settings'),
+      'title' => t('Administer Design & PR Requests Settings'),
     ),
   );
 }

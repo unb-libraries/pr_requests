@@ -1,5 +1,5 @@
-name = PR Requests
-description = A module that handles Fredericton UNB Library PR Group submission requests.
+name = Design & PR Requests
+description = A module that handles Fredericton UNB Library Design & PR Group submission requests.
 core = 7.x
 package = UNB Library
 dependencies[] = date
