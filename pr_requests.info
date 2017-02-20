@@ -2,12 +2,13 @@ name = PR Requests
 description = A module that handles Fredericton UNB Library PR Group submission requests.
 core = 7.x
 package = UNB Library
-
 dependencies[] = date
 dependencies[] = date_popup
 dependencies[] = elements
+dependencies[] = features
 dependencies[] = file
-dependencies[] = text
+dependencies[] = menu
 dependencies[] = number
-
 configure = admin/config/pr-requests
+features[features_api][] = api:2
+features[menu_links][] = navigation_design--pr-requests:pr-requests
