@@ -12,3 +12,4 @@ dependencies[] = number
 configure = admin/config/pr-requests
 features[features_api][] = api:2
 features[menu_links][] = navigation_design--pr-requests:pr-requests
+features[user_role][] = UNBF Staff
