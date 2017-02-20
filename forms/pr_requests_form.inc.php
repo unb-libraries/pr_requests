@@ -27,13 +27,11 @@ function pr_requests_form($form, &$form_state) {
     return;
   }
 
-  $unit_approval_message = t('To request assistance from the PR
-      group, please complete and submit this form. A confirmation email will be
-      sent upon receipt. If there are any follow up questions, or if
-      consultation is required, you will be notified. Please note that requests
-      will be prioritized. Once the request is approved, the appropriate
-      individuals on the PR Committee will complete the tasks involved by the
-      agreed-upon date.');
+  // Attach module css and/or javascript files for module page only.
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'pr_requests') . '/css/pr_requests.css',
+  );
+
   $form['supervisor_approved'] = array(
     '#type' => 'checkbox',
     '#title' => t('Unit manager is aware of and supports this request.'),
