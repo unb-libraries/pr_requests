@@ -18,11 +18,6 @@ function pr_requests_form($form, &$form_state) {
     t('Design & PR Requests (UNBF)')
   );
 
-  $unit_approval_message = t('To request Graphic Design support and/or assistance from the PR group, please complete and submit this form.
-  A confirmation email will be sent upon receipt. If there are any follow up questions, or if consultation is required, you will be notified.
-  Please note that requests will be prioritized. Once the request is approved, the appropriate individuals will complete the tasks involved
-  by the agreed-upon deadline. Ideally 2 - 4 weeks lead-time is recommended for promotional campaigns/assistance with events/workshops.');
-
   // Check if PR Requests settings required fields have been completed.
   $pr_settings_email_list = variable_get('pr_requests_email_list');
   $pr_settings_fb_user = variable_get('pr_requests_fogbugz_email');
@@ -31,6 +26,11 @@ function pr_requests_form($form, &$form_state) {
     drupal_set_message(t('PR Requests configuration is not yet complete, please contact the site administrator.'), 'error');
     return;
   }
+
+  $unit_approval_message = t('To request Graphic Design support and/or assistance from the PR group, please complete and submit this form.
+  A confirmation email will be sent upon receipt. If there are any follow up questions, or if consultation is required, you will be notified.
+  Please note that requests will be prioritized. Once the request is approved, the appropriate individuals will complete the tasks involved
+  by the agreed-upon deadline. Ideally 2 - 4 weeks lead-time is recommended for promotional campaigns/assistance with events/workshops.');
 
   // Attach module css and/or javascript files for module page only.
   $form['#attached']['css'] = array(
