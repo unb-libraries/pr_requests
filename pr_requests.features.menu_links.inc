@@ -18,7 +18,7 @@ function pr_requests_menu_default_menu_links() {
     'link_title' => 'Design & PR Requests',
     'options' => array(
       'attributes' => array(
-        'title' => 'A form used to request PR Group assistance.',
+        'title' => 'A form used to submit Design and PR Group requests.',
       ),
       'alter' => TRUE,
       'identifier' => 'navigation_design--pr-requests:pr-requests',
@@ -29,8 +29,7 @@ function pr_requests_menu_default_menu_links() {
     'has_children' => 0,
     'expanded' => 0,
     'weight' => 0,
-    'customized' => 1,
-    'parent_identifier' => 'navigation_administration--requests:<front>',
+    'customized' => 0,
   );
 
   // Translatables
