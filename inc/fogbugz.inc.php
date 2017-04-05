@@ -73,7 +73,7 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
 
   $ticket_information = array(
     'project' => 'PR Requests',
-    'title' => 'Design & PR Request from ' . $form_state['values']['fullname'],
+    'title' => 'Design & Communications Request from ' . $form_state['values']['fullname'],
     'category' => 'PR Request',
     'email' => $form_state['values']['fullname'] . " <" . $form_state['values']['email'] . ">",
     'email_list' => $bcc,
@@ -137,9 +137,9 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
  *   Associative array of information from the newly submitted ticket.
  */
 function _pr_requests_send_confirmation_email($token, array $ticket_information) {
-  $message = "Design & PR Request submitted. Reference number for this ticket is ";
+  $message = "Design & Communications Request submitted. Reference number for this ticket is ";
   $message .= $ticket_information['case_id'] . ".\n\n";
-  $message .= "Design & PR Request Details:\n--------------------------\n\n";
+  $message .= "Design & Communications Request Details:\n--------------------------\n\n";
   $message .= $ticket_information['description'] . "\n";
 
   $curl_handle = curl_init('https://support.lib.unb.ca/api.asp?cmd=forward');
@@ -151,7 +151,7 @@ function _pr_requests_send_confirmation_email($token, array $ticket_information)
     'sFrom' => 'libsystems@unb.ca',
     'sTo' => $ticket_information['email'],
     'sBCC' => $ticket_information['email_list'],
-    'sSubject' => 'Design & PR Request submitted (Case ' . $ticket_information['case_id'] . ')',
+    'sSubject' => 'Design & Communications Request submitted (Case ' . $ticket_information['case_id'] . ')',
     'sEvent' => $message,
   );
   curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $ch_post_data);

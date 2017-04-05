@@ -15,12 +15,12 @@ function pr_requests_settings_form($form, &$form_state) {
   $form = array();
 
   drupal_set_title(
-    t('Design & PR Request form settings')
+    t('Design & Communications Request form settings')
   );
 
   $form['pr_requests_email_list'] = array(
     '#type' => 'textfield',
-    '#title' => t('Design & PR Group email list:'),
+    '#title' => t('Design & Communication Committee email list:'),
     '#size' => '110',
     '#default_value' => variable_get('pr_requests_email_list', ''),
     '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),
@@ -112,7 +112,7 @@ function pr_requests_settings_form_validate($form, &$form_state) {
 
   foreach ($email_list as $value) {
     if (!valid_email_address($value)) {
-      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the PR Group email list (multiple addresss must be separated with a comma).'));
+      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the Communication Committee email list (multiple addresss must be separated with a comma).'));
     }
   }
 

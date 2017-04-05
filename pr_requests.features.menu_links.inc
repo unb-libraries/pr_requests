@@ -18,7 +18,7 @@ function pr_requests_menu_default_menu_links() {
     'link_title' => 'Design & Communications Request',
     'options' => array(
       'attributes' => array(
-        'title' => 'A form used to submit Design and PR Group requests.',
+        'title' => 'A form used to submit Design and Communication Committee requests.',
       ),
       'alter' => TRUE,
       'identifier' => 'navigation_design--communications-request:pr-requests',
