@@ -10,18 +10,18 @@
 function pr_requests_menu_default_menu_links() {
   $menu_links = array();
 
-  // Exported menu link: navigation_design--pr-requests:pr-requests.
-  $menu_links['navigation_design--pr-requests:pr-requests'] = array(
+  // Exported menu link: navigation_design--communications-request:pr-requests.
+  $menu_links['navigation_design--communications-request:pr-requests'] = array(
     'menu_name' => 'navigation',
     'link_path' => 'pr-requests',
     'router_path' => 'pr-requests',
-    'link_title' => 'Design & PR Requests',
+    'link_title' => 'Design & Communications Request',
     'options' => array(
       'attributes' => array(
         'title' => 'A form used to submit Design and PR Group requests.',
       ),
       'alter' => TRUE,
-      'identifier' => 'navigation_design--pr-requests:pr-requests',
+      'identifier' => 'navigation_design--communications-request:pr-requests',
     ),
     'module' => 'system',
     'hidden' => 0,
@@ -29,13 +29,13 @@ function pr_requests_menu_default_menu_links() {
     'has_children' => 0,
     'expanded' => 0,
     'weight' => 0,
-    'customized' => 0,
+    'customized' => 1,
     'parent_identifier' => 'navigation_requests:<front>',
   );
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Design & PR Requests');
+  t('Design & Communications Request');
 
   return $menu_links;
 }

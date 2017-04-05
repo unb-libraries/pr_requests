@@ -1,4 +1,4 @@
-name = Design & PR Requests
+name = Design & Communications Request
 description = A module that handles Fredericton UNB Library Design & PR Group submission requests.
 core = 7.x
 package = UNB Library
@@ -11,5 +11,5 @@ dependencies[] = menu
 dependencies[] = number
 configure = admin/config/pr-requests
 features[features_api][] = api:2
-features[menu_links][] = navigation_design--pr-requests:pr-requests
+features[menu_links][] = navigation_design--communications-request:pr-requests
 features[user_role][] = UNBF Staff
