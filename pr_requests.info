@@ -1,5 +1,5 @@
 name = Design & Communications Request
-description = A module that handles Fredericton UNB Library Design & Communication Committee submission requests.
+description = A module that handles Fredericton UNB Library Design & Communications Committee submission requests.
 core = 7.x
 package = UNB Library
 dependencies[] = date

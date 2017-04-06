@@ -18,7 +18,7 @@ function pr_requests_menu_default_menu_links() {
     'link_title' => 'Design & Communications Request',
     'options' => array(
       'attributes' => array(
-        'title' => 'A form used to submit Design and Communication Committee requests.',
+        'title' => 'A form used to submit Design and Communications Committee requests.',
       ),
       'alter' => TRUE,
       'identifier' => 'navigation_design--communications-request:pr-requests',
@@ -28,7 +28,7 @@ function pr_requests_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => 0,
+    'weight' => -25,
     'customized' => 1,
     'parent_identifier' => 'navigation_requests:<front>',
   );

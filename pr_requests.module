@@ -4,7 +4,7 @@
  * PR Requests Module for Drupal 7.x.
  *
  * This module handles submission requests to the Fredericton UNB Libraries' PR
- * Group. It provides a request form and configurable Communication Committee
+ * Group. It provides a request form and configurable Communications Committee
  * email list. Corresponding FogBugz ticket is created, applicant is sent a
  * confirmation email and members of the email list are notified upon successful
  * request submissions.
@@ -16,8 +16,8 @@
 function pr_requests_menu() {
   $items = array();
   $items['pr-requests'] = array(
-    'title' => 'Design & PR Requests',
-    'description' => 'A form used to submit Design and Communication Committee requests.',
+    'title' => 'Design & Communications Requests',
+    'description' => 'A form used to submit Design and Communications Committee requests.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_form'),
     'file' => 'forms/pr_requests_form.inc.php',
@@ -25,8 +25,8 @@ function pr_requests_menu() {
   );
 
   $items['admin/config/pr-requests'] = array(
-    'title' => 'Design & PR Requests settings',
-    'description' => 'Configure Design & Communication Committee email list and file upload options.',
+    'title' => 'Design & Communications Requests settings',
+    'description' => 'Configure Design & Communications Committee email list and file upload options.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pr_requests_settings_form'),
     'file' => 'forms/pr_requests_settings_form.inc.php',

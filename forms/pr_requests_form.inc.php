@@ -27,7 +27,7 @@ function pr_requests_form($form, &$form_state) {
     return;
   }
 
-  $unit_approval_message = t('To request Graphic Design support and/or assistance from the Communication Committee, please complete and submit this form.
+  $unit_approval_message = t('To request Graphic Design support and/or assistance from the Communications Committee, please complete and submit this form.
   A confirmation email will be sent upon receipt. If there are any follow up questions, or if consultation is required, you will be notified.
   Please note that requests will be prioritized. Once the request is approved, the appropriate individuals will complete the tasks involved
   by the agreed-upon deadline. Ideally 2 - 4 weeks lead-time is recommended for promotional campaigns/assistance with events/workshops.');
@@ -246,7 +246,7 @@ function pr_requests_submit($form, &$form_state) {
   }
   $success = _pr_requests_create_fogbugz_ticket($token, $form_state);
   if ($success) {
-    drupal_set_message(t('Your request has been submitted to the Communication Committee. We will send you a confirmation email shortly.'));
+    drupal_set_message(t('Your request has been submitted to the Communications Committee. We will send you a confirmation email shortly.'));
   }
   else {
     drupal_set_message(t('Your submission request was not successful. If this error persists, please contact the site administrator.'), 'error');

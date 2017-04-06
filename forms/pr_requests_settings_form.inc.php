@@ -20,7 +20,7 @@ function pr_requests_settings_form($form, &$form_state) {
 
   $form['pr_requests_email_list'] = array(
     '#type' => 'textfield',
-    '#title' => t('Design & Communication Committee email list:'),
+    '#title' => t('Design & Communications Committee email list:'),
     '#size' => '110',
     '#default_value' => variable_get('pr_requests_email_list', ''),
     '#description' => t('Enter a valid email address - separate multiple addresses with a comma'),
@@ -112,7 +112,7 @@ function pr_requests_settings_form_validate($form, &$form_state) {
 
   foreach ($email_list as $value) {
     if (!valid_email_address($value)) {
-      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the Communication Committee email list (multiple addresss must be separated with a comma).'));
+      form_set_error('pr_requests_email_list', t('Invalid email format: please correct the Communications Committee email list (multiple addresss must be separated with a comma).'));
     }
   }
 
