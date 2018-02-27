@@ -110,7 +110,7 @@ function pr_requests_form($form, &$form_state) {
 
   $form['conditional-wrapper']['project']['graphic'] = array(
     '#type' => 'textarea',
-    '#title' => 'Graphic material',
+    '#title' => 'Graphic Material',
     '#description' => t('i.e. brochure, poster, website design, image, etc.'),
     '#required' => TRUE,
   );
