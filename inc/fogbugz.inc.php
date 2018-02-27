@@ -64,7 +64,8 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     $description .= ": " . $form_state['values']['other'];
   }
   $description .= "\n\nAbout the Project:\n" .
-    $form_state['values']['about'] . "\n\nContent:\n" .
+    $form_state['values']['about'] . "\n\nGraphic Material:\n" .
+    $form_state['values']['graphic'] . "\n\nContent:\n" .
     $form_state['values']['content'] . "\n\nTarget Audience:\n" .
     $form_state['values']['target'] . "\n";
 
