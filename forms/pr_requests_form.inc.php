@@ -133,7 +133,10 @@ function pr_requests_form($form, &$form_state) {
     '#type' => 'checkboxes',
     '#title' => t('For promotion of event or activity, which media channels would you like to use to communicate the news?'),
     '#options' => array(
-        'Library News' => t('Library News'),
+        'Library News on homepage' => t('Library News on homepage @homepage-url',
+            array('@homepage-url' => '(https://www.lib.unb.ca)')
+        ),
+        'Library Feature (image box on homepage)' => 'Library Feature (image box on homepage)',
         'myUNB News' => t('myUNB News'),
         'Facebook' => t('Facebook'),
         'Twitter' => t('Twitter'),
