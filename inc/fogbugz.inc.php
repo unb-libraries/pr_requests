@@ -69,6 +69,14 @@ function _pr_requests_create_fogbugz_ticket($token, array $form_state) {
     $form_state['values']['content'] . "\n\nTarget Audience:\n" .
     $form_state['values']['target'] . "\n";
 
+    $promotion_options = array_filter($form_state['values']['promotion']);
+    if (sizeof($promotion_options) > 0) {
+        $description .= "\nMedia Channel Promotion:\n";
+        foreach($promotion_options as $key => $value) {
+            $description .= "- " . $value . "\n";
+        }
+    }
+
   // Add space after commas for readabiliy when have multiple email addresses.
   $bcc = preg_replace('/,/', ', ', $form_state['values']['email_list']);
 
