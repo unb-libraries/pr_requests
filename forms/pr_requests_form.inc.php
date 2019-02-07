@@ -125,9 +125,23 @@ function pr_requests_form($form, &$form_state) {
   $form['conditional-wrapper']['project']['target'] = array(
     '#type' => 'textarea',
     '#title' => t('Target Audience'),
-    '#description' => t('i.e. Faculty, students, general public, UNB/STU,
-      etc.'),
+    '#description' => t('i.e. Faculty, students, general public, UNB/STU, etc.'),
     '#required' => TRUE,
+  );
+
+  $form['conditional-wrapper']['project']['promotion'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('For promotion of event or activity, which media channels would you like to use to communicate the news?'),
+    '#options' => array(
+        'Library News' => t('Library News'),
+        'myUNB News' => t('myUNB News'),
+        'Facebook' => t('Facebook'),
+        'Twitter' => t('Twitter'),
+        'Instagram' => t('Instagram'),
+        'LCD Screen' => t('LCD Screen'),
+    ),
+    '#description' => t('Optional, multiple selections are supported.'),
+    '#required' => FALSE,
   );
 
   $request_file_limit = variable_get('pr_requests_files_limit');
